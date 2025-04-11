@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kompozytor klasówek - Matematyka</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #b8c4cb;
+    }
+    header {
+      background-color: #326aa5;
+      color: white;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+    }
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    nav {
+      background-color: #517ba2;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+    }
+    .container {
+      display: flex;
+      margin: 20px;
+      gap: 20px;
+    }
+    .panel {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      flex: 1;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      height: 600px;
+      overflow-y: auto;
+    }
+    .taskset-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    .print-button {
+      margin: 10px 0;
+      padding: 10px 20px;
+      background-color: #326aa5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .header-options {
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #eef2f5;
+      border-radius: 5px;
+    }
+    .header-options label {
+      display: block;
+      margin: 5px 0 2px;
+    }
+    .header-options input, .header-options select {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 5px;
+    }
+    .filter-section {
+      margin-top: 15px;
+    }
+    .grupa-selectors {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .grupa-selectors select {
+      flex: 1;
+    }
+    .answer-lines {
+      margin-top: 15px;
+    }
+    .answer-lines input {
+      width: 100%;
+      padding: 5px;
+    }
+    .points-input {
+      margin-top: 15px;
+    }
+    .points-input input {
+      width: 50%;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Kompozytor klasówek i kart pracy – Matematyka</h1>
+  </header>
+  <nav>
+    <div>1 Wybieranie</div>
+    <div>2 Komponowanie</div>
+    <div>3 Drukowanie</div>
+  </nav>
+  <div class="container">
+    <div class="panel">
+      <h3>Biblioteka zadań</h3>
+
+      <!-- Harmonijka do wyboru przedmiotu -->
+      <button class="collapsible">Wybierz przedmiot</button>
+      <div class="content">
+        <select id="przedmiotFilter">
+          <option value="matematyka">Matematyka</option>
+          <option value="polski">Język Polski</option>
+          <option value="angielski">Język Angielski</option>
+          <option value="biologia">Biologia</option>
+          <option value="chemia">Chemia</option>
+          <option value="fizyka">Fizyka</option>
+          <option value="geografia">Geografia</option>
+          <option value="historia">Historia</option>
+          <option value="wos">Wiedza o Społeczeństwie</option>
+          <option value="informatyka">Informatyka</option>
+        </select>
+      </div>
+
+      <!-- Harmonijka do wyboru klasy -->
+      <button class="collapsible">Wybierz klasę</button>
+      <div class="content">
+        <select id="klasaFilter">
+          <option value="">Wszystkie</option>
+          <option value="4">Klasa 4</option>
+          <option value="5">Klasa 5</option>
+          <option value="6">Klasa 6</option>
+          <option value="7">Klasa 7</option>
+          <option value="8">Klasa 8</option>
+        </select>
+      </div>
+
+      <!-- Harmonijka do wyboru grupy -->
+      <button class="collapsible">Od grupy do grupy</button>
+      <div class="content grupa-selectors">
+        <select id="grupaOd">
+          <option value="A">Grupa A</option>
+          <option value="B">Grupa B</option>
+          <option value="C">Grupa C</option>
+        </select>
+        <select id="grupaDo">
+          <option value="A">Grupa A</option>
+          <option value="B">Grupa B</option>
+          <option value="C">Grupa C</option>
+        </select>
+      </div>
+
+      <button onclick="utworzWlasneZadanie()">Utwórz zadanie własne</button>
+    </div>
+    <div class="panel">
+      <div class="taskset-title">
+        <span>Sprawdzian</span>
+      </div>
+      <div class="header-options">
+        <label>Imię i nazwisko:</label>
+        <input type="text" placeholder="..................................................">
+        <label>Nr w dzienniku:</label>
+        <input type="text" placeholder="..................................................">
+        <label>Klasa:</label>
+        <select>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+        </select>
+        <label>Data:</label>
+        <input type="text" placeholder="..................................................">
+      </div>
+      <button class="print-button" onclick="drukujPDF()">Drukuj jako PDF</button>
+      <div id="zestawZadan">
+        <!-- Tu będą dodawane zadania -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <script>
+    var coll = document.getElementsByClassName("collapsible");
+
+    // Funkcja do obsługi harmonijek
+    function toggleCollapsible() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        content.style.display = "block";
+      }
+    }
+
+    // Przypisanie kliknięć do harmonijek
+    for (var i = 0; i < coll.length; i++) {
+      coll[i].addEventListener("click", toggleCollapsible);
+    }
+
+    // Funkcja do dodawania zadania do sprawdzianu
+    function dodajDoZestawu(element, tresc, miejsce, punktyMax, linieOdpowiedzi) {
+      const zadanie = document.createElement("div");
+      zadanie.className = "task";
+      zadanie.innerHTML = `${tresc} (${miejsce}) - (____/${punktyMax} punktów)<br>`;
+      
+      // Dodajemy linie odpowiedzi do sprawdzianu
+      const odpowiedziDiv = document.createElement("div");
+      odpowiedziDiv.className = "answer-lines";
+      for (let i = 0; i < linieOdpowiedzi; i++) {
+        const linia = document.createElement("input");
+        linia.type = "text";
+        odpowiedziDiv.appendChild(linia);
+      }
+
+      zadanie.appendChild(odpowiedziDiv);
+      document.getElementById("zestawZadan").appendChild(zadanie);
+    }
+
+    // Funkcja tworzenia zadania własnego
+    function utworzWlasneZadanie() {
+      const tresc = prompt("Wpisz treść własnego zadania:");
+      if (tresc) {
+        const miejsce = prompt("Podaj kategorię zadania (np. matematyka, tekstowe):");
+        const linieOdpowiedzi = prompt("Ile linii na odpowiedź? (np. 5)");
+        const punktyMax = prompt("Ile maksymalnie punktów za to zadanie? (np. 5)");
+
+        // Dodajemy zadanie do biblioteki, ale nie klonujemy go
+        const noweZadanie = document.createElement("div");
+        noweZadanie.className = "task";
+        noweZadanie.innerHTML = `${tresc} (${miejsce}) - (____/${punktyMax} punktów)`;
+        noweZadanie.onclick = function () {
+          dodajDoZestawu(noweZadanie, tresc, miejsce, punktyMax, linieOdpowiedzi);
+        };
+        document.querySelector(".container .panel").appendChild(noweZadanie);
+      }
+    }
+
+    // Funkcja drukowania do PDF
+    function drukujPDF() {
+      const element = document.querySelector(".panel:last-child");
+      const printButton = document.querySelector(".print-button");
+
+      printButton.style.display = "none";
+
+      const opt = {
+        margin:       0.5,
+        filename:     'sprawdzian.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        printButton.style.display = "inline-block";
+      });
+    }
+  </script>
+</body>
+</html>
